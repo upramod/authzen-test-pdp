@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: authzen-test-pdp
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    autoDeployTrigger: commit
