@@ -26,12 +26,12 @@ class Handler(BaseHTTPRequestHandler):
         if self.path != '/access/v1/evaluation':
             self.send_error(404); return
         if self.headers.get('Content-Type', '').split(';')[0] != 'application/json':
-            self.send_error(415); return
+            self.send_error(400); return
         try:
             data = json.loads(self.rfile.read(int(self.headers.get('Content-Length', 0))))
             for key in ('subject', 'action', 'resource'):
                 if not isinstance(data[key], dict): raise ValueError(key)
-            for key, field in (('subject', 'id'), ('action', 'name'), ('resource', 'id')):
+            for key, field in (('subject', 'type'), ('subject', 'id'), ('action', 'name'), ('resource', 'type'), ('resource', 'id')):
                 if not isinstance(data[key][field], str): raise ValueError(field)
             result = json.dumps({'decision': decide(data)}).encode()
         except (ValueError, KeyError, TypeError, json.JSONDecodeError):
