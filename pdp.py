@@ -30,6 +30,12 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(b'{"status":"ok"}')
 
+    def do_PUT(self):
+        self.send_response(405)
+        self.send_header('Allow', 'POST')
+        self.send_header('Content-Length', '0')
+        self.end_headers()
+
     def do_POST(self):
         if self.path != '/access/v1/evaluation':
             self.send_error(404); return
