@@ -87,6 +87,15 @@ class ProtocolTests(unittest.TestCase):
         data['action']['name'] = 123
         self.assertEqual(self.post(data)[0], 400)
 
+    def test_put_rejected_with_405(self):
+        conn = HTTPConnection('127.0.0.1', self.server.server_port, timeout=5)
+        conn.request('PUT', '/access/v1/evaluation', b'{}', {'Content-Type': 'application/json'})
+        response = conn.getresponse()
+        self.assertEqual(response.status, 405)
+        self.assertEqual(response.getheader('Allow'), 'POST')
+        response.read()
+        conn.close()
+
     def test_idempotency(self):
         results = [json.loads(self.post(self.fixture())[2])['decision'] for _ in range(3)]
         self.assertEqual(results, [True] * 3)
