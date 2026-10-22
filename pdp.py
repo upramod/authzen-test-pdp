@@ -45,4 +45,4 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == '__main__':
-    ThreadingHTTPServer(('127.0.0.1', 8080), Handler).serve_forever()
+    ThreadingHTTPServer(('0.0.0.0', 8080), Handler).serve_forever()
