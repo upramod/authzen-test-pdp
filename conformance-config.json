@@ -1,0 +1,8 @@
+{
+  "alias": "pramod-authzen-endpoints",
+  "description": "Experimental fixture PDP: batch, search and discovery interoperability testing",
+  "publish": "no",
+  "pdp": {
+    "policy_decision_point": "https://authzen-test-pdp.calmbeach-7657ba97.westus2.azurecontainerapps.io"
+  }
+}
