@@ -186,6 +186,20 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(self.batch(data), (200, {'evaluations': [
             {'decision': True}, {'decision': False}]}))
 
+    def test_batch_permit_on_first_permit_truncates_response(self):
+        data = {
+            'subject': {'type': 'user', 'id': 'bob'},
+            'resource': {'type': 'record', 'id': 'record-1'},
+            'evaluations': [
+                {'action': {'name': 'write'}},
+                {'action': {'name': 'read'}},
+                {'action': {'name': 'write'}},
+            ],
+            'options': {'evaluations_semantic': 'permit_on_first_permit'},
+        }
+        self.assertEqual(self.batch(data), (200, {'evaluations': [
+            {'decision': False}, {'decision': True}]}))
+
     def test_batch_without_defaults(self):
         allow = self.fixture()
         deny = self.fixture()
