@@ -55,7 +55,7 @@ def evaluate_batch(request):
     if not isinstance(options, dict):
         raise ValueError('options must be an object')
     semantic = options.get('evaluations_semantic', 'execute_all')
-    if semantic not in ('execute_all', 'deny_on_first_deny'):
+    if semantic not in ('execute_all', 'deny_on_first_deny', 'permit_on_first_permit'):
         raise ValueError('Unsupported evaluations semantic')
     if not items:
         return evaluate(request)
@@ -83,7 +83,7 @@ def evaluate_batch(request):
             results.append(evaluate(merged))
         except ValueError:
             results.append({'decision': False, 'context': {'error': 'invalid_evaluation'}})
-        if semantic == 'deny_on_first_deny' and results[-1]['decision'] is False:
+        if (semantic == 'deny_on_first_deny' and results[-1]['decision'] is False) or (semantic == 'permit_on_first_permit' and results[-1]['decision'] is True):
             break
     return {'evaluations': results}
 
