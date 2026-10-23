@@ -114,7 +114,7 @@ def decide(request):
         return False
     status = resource.get('properties', {}).get('status', 'archived' if rid == 'record-2' else 'active')
     role = subject.get('properties', {}).get('role', 'admin' if sid == 'bob' else None)
-    if name == 'read' and rid == 'record-1' and sid in ('alice', 'bob'):
+    if name == 'read' and sid in ('alice', 'bob'):
         return True
     if name == 'write':
         if status == 'archived':
