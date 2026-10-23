@@ -260,7 +260,7 @@ class ProtocolTests(unittest.TestCase):
                          (200, {'results': [{'type': 'record', 'id': 'record-2'}]}))
         data['resource'] = {'type': 'record', 'id': 'record-2', 'properties': {'status': 'archived'}}
         del data['action']
-        self.assertEqual(self.search(data, 'action'), (200, {'results': [{'name': 'write'}]}))
+        self.assertEqual(self.search(data, 'action'), (200, {'results': [{'name': 'read'}, {'name': 'write'}]}))
 
     def test_search_unknown_entities_deny_even_with_admin_properties(self):
         for target in ('subject', 'resource', 'action'):
