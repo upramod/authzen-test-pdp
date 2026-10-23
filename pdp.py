@@ -65,9 +65,19 @@ def evaluate_batch(request):
     for item in items:
         if not isinstance(item, dict):
             raise ValueError('Each evaluation must be an object')
-        merged = {key: item.get(key, request.get(key))
-                  for key in ('subject', 'action', 'resource', 'context')
-                  if key in item or key in request}
+        merged = {}
+        for key in ('subject', 'action', 'resource', 'context'):
+            if key not in item and key not in request:
+                continue
+            default = request.get(key, {})
+            override = item.get(key, {})
+            if isinstance(default, dict) and isinstance(override, dict):
+                entity = {**default, **override}
+                if isinstance(default.get('properties'), dict) and isinstance(override.get('properties'), dict):
+                    entity['properties'] = {**default['properties'], **override['properties']}
+                merged[key] = entity
+            else:
+                merged[key] = override if key in item else default
         try:
             results.append(evaluate(merged))
         except ValueError:
