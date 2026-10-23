@@ -108,7 +108,7 @@ class ProtocolTests(unittest.TestCase):
         status, _, body = self.post(data, path='/access/v1/search/' + target)
         return status, json.loads(body)
 
-    def test_batch_defaults_order_and_whole_entity_override(self):
+    def test_batch_defaults_order_and_field_merging(self):
         data = self.fixture()
         data['action'] = {'name': 'write'}
         data['context'] = {'trace': 'fixture'}
@@ -117,11 +117,11 @@ class ProtocolTests(unittest.TestCase):
                                              'properties': {'status': 'archived'}}}]
         self.assertEqual(self.batch(data), (200, {'evaluations': [
             {'decision': True}, {'decision': False}, {'decision': False}]}))
-        # A partial entity replaces the default; it must not inherit its id.
+        # A partial entity inherits unspecified default fields.
         data['evaluations'] = [{'subject': {'type': 'user'}}, {}]
         status, body = self.batch(data)
         self.assertEqual(status, 200)
-        self.assertEqual([item['decision'] for item in body['evaluations']], [False, True])
+        self.assertEqual([item['decision'] for item in body['evaluations']], [True, True])
 
     def test_batch_properties_and_context_override(self):
         data = self.fixture()
@@ -134,6 +134,31 @@ class ProtocolTests(unittest.TestCase):
         status, body = self.batch(data)
         self.assertEqual(status, 200)
         self.assertEqual([item['decision'] for item in body['evaluations']], [True, False, True])
+
+    def test_batch_resource_type_and_properties_inherited(self):
+        data = {
+            'subject': {'type': 'user', 'id': 'alice'},
+            'action': {'name': 'write'},
+            'resource': {'type': 'record'},
+            'evaluations': [
+                {'resource': {'id': 'record-1', 'properties': {'status': 'active'}}},
+                {'resource': {'id': 'record-2', 'properties': {'status': 'archived'}}},
+            ],
+        }
+        self.assertEqual(self.batch(data), (200, {'evaluations': [
+            {'decision': True}, {'decision': False}]}))
+
+    def test_batch_nested_properties_merge(self):
+        data = {
+            'subject': {'type': 'user', 'id': 'bob',
+                        'properties': {'role': 'admin', 'team': 'security'}},
+            'action': {'name': 'write'},
+            'resource': {'type': 'record', 'properties': {'status': 'archived'}},
+            'evaluations': [
+                {'resource': {'id': 'record-2', 'properties': {'label': 'restricted'}}},
+            ],
+        }
+        self.assertEqual(self.batch(data), (200, {'evaluations': [{'decision': True}]}))
 
     def test_batch_without_defaults(self):
         allow = self.fixture()
