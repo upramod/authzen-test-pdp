@@ -135,6 +135,18 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual([item['decision'] for item in body['evaluations']], [True, False, True])
 
+    def test_batch_read_both_records(self):
+        data = {
+            'subject': {'type': 'user', 'id': 'alice'},
+            'action': {'name': 'read'},
+            'evaluations': [
+                {'resource': {'type': 'record', 'id': 'record-1'}},
+                {'resource': {'type': 'record', 'id': 'record-2'}},
+            ],
+        }
+        self.assertEqual(self.batch(data), (200, {'evaluations': [
+            {'decision': True}, {'decision': True}]}))
+
     def test_batch_resource_type_and_properties_inherited(self):
         data = {
             'subject': {'type': 'user', 'id': 'alice'},
@@ -191,7 +203,7 @@ class ProtocolTests(unittest.TestCase):
     def test_search_core_fixtures_and_ignored_target_ids(self):
         expected = {
             'subject': [{'type': 'user', 'id': 'alice'}, {'type': 'user', 'id': 'bob'}],
-            'resource': [{'type': 'record', 'id': 'record-1'}],
+            'resource': [{'type': 'record', 'id': 'record-1'}, {'type': 'record', 'id': 'record-2'}],
             'action': [{'name': 'read'}, {'name': 'write'}],
         }
         for target in expected:
