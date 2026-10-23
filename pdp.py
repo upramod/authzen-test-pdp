@@ -54,8 +54,9 @@ def evaluate_batch(request):
     options = request.get('options', {})
     if not isinstance(options, dict):
         raise ValueError('options must be an object')
-    if options.get('evaluations_semantic', 'execute_all') != 'execute_all':
-        raise ValueError('Only execute_all is supported')
+    semantic = options.get('evaluations_semantic', 'execute_all')
+    if semantic not in ('execute_all', 'deny_on_first_deny'):
+        raise ValueError('Unsupported evaluations semantic')
     if not items:
         return evaluate(request)
     for key in ('subject', 'action', 'resource', 'context'):
@@ -82,6 +83,8 @@ def evaluate_batch(request):
             results.append(evaluate(merged))
         except ValueError:
             results.append({'decision': False, 'context': {'error': 'invalid_evaluation'}})
+        if semantic == 'deny_on_first_deny' and results[-1]['decision'] is False:
+            break
     return {'evaluations': results}
 
 
